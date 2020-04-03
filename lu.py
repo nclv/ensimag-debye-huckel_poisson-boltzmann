@@ -13,7 +13,7 @@ def lutri(a, b, c):
                            diagonale de U vecteur réel de dimension n]
     """
     n = len(a)
-    [l, v] = [[], [a[0]]]
+    l, v = [], [a[0]]
     for i in range(1, n):
         l.append(b[i - 1] / v[i - 1])
         v.append(a[i] - l[i - 1] * c[i - 1])
@@ -49,14 +49,17 @@ def remontee(v, c, y):
     return x
 
 def main():
-    a = [1, 10, 10]
-    b = [2, 6]
-    c = [4, 5]
-    [l, v] = lutri([1, 10, 18], [2, 6], [4, 5])
-    print([l, v])
+    b, a, c = [2, 6], [1, 10, 10], [4, 5]
+    l, v = lutri(a, b, c)
+    print(l, v)
     y = descente(l, [3, 3, 3])
     print(y)
     x = remontee(v, c, [3, 3, 3])
     print(x)
+
+    b, a, c = [-4, -3, -2, 2], [-2, 5, -1, 4, -2], [1, 2, -1, 1]
+    l, v = lutri(a, b, c)
+    assert(l == [2.0, -1.0, -2.0, 1.0] and v == [-2, 3.0, 1.0, 2.0, -3.0])
+    print(l, v)
 
 main()
