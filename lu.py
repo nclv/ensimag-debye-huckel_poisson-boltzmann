@@ -69,6 +69,7 @@ def plot_echantillon_q5(n):
     """
     try:
         mu = 1
+        # ISSUE : variable h appelée avant d'avoir été assignée
         z = [mu * h * (h - 2)] + [0 for _ in range(n -1)]
         u = resoudre_systeme(n, mu, z)
         h = 10 / n
@@ -87,6 +88,7 @@ def plot_echantillon_q6(n):
     try:
         suite_u0 = []
         mu = 1
+        # ISSUE : variable h appelée avant d'avoir été assignée
         z = [mu * h * (h - 2)] + [0 for _ in range(n -1)]
         for i in range(1, n + 1):
             u = resoudre_systeme(i, mu, z)
