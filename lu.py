@@ -87,8 +87,8 @@ def solve_debye_huckel(n, mu):
     return x, np.array(u), [b, a, c]
 
 
-def plot_debye_huckel(x, u):
-    plt.plot(x, u, label="Debye-Huckel")
+def plot_debye_huckel(x, u, mu):
+    plt.plot(x, u, label=f"Debye-Huckel mu = {mu}")
     plt.xlabel("Points de discrétisations $x_i$")
     plt.ylabel("Solutions ponctuelles $u_i$")
     plt.title("Schéma aux différences finies de l'équation de Debye-Huckel")
@@ -100,7 +100,7 @@ def plot_echantillon_q5(mu):
         Affichage des couples (xi, ui)
     """
     x, u, _ = solve_debye_huckel(n=1000, mu=mu)
-    plot_debye_huckel(x, u)
+    plot_debye_huckel(x, u, mu)
 
 
 def plot_echantillon_q6(mu):
@@ -110,7 +110,7 @@ def plot_echantillon_q6(mu):
     u0, h = [], []
     for n in [10, 15, 30, 70, 100, 1000, 10000]:
         _, u, _ = solve_debye_huckel(n, mu=mu)
-        # plot_debye_huckel(x, u)
+        # plot_debye_huckel(x, u, mu)
         # plt.show()
         u0.append(u[0])
         h.append(10 / n)
@@ -194,35 +194,83 @@ def calcul_uk0(mu=1):
 def plot_echantillon_q8(mu):
     x, u, k = calcul_uk0(mu=mu)
     print(f"k vaut {k} pour mu = {mu}")
-    plt.plot(x, u, label="Poisson-Boltzmann")
+    plt.plot(x, u, label=f"Poisson-Boltzmann mu = {mu}")
     plt.xlabel("Points de discrétisations $x_i$")
     plt.ylabel("Solutions ponctuelles $u_i$")
     plt.title("Schéma aux différences finies de l'équation de Poisson-Boltzmann")
     plt.legend()
 
 
+def plot_variations_mu():
+    """
+        Au dela de mu = 6.4 :
+            RuntimeWarning: overflow encountered in sinh
+            RuntimeWarning: invalid value encountered in double_scalars
+            g = lambda x: np.sinh(x) - x
+    """
+
+    fig = plt.figure()
+    for mu in np.linspace(0.1, 6.4, 10):
+        mu = round(mu, 3)
+        plot_echantillon_q5(mu)
+    fig.savefig("debye_mu_variations.png")
+
+    fig = plt.figure()
+    for mu in np.linspace(0.1, 6.4, 10):
+        mu = round(mu, 3)
+        plot_echantillon_q8(mu)
+    fig.savefig("poisson_mu_variations.png")
+    # pour mu = 5.7 et mu = 6.4 on retombe ie. diverge
+
+    for mu in np.linspace(0.1, 6.4, 10):
+        mu = round(mu, 3)
+        fig = plt.figure()
+        plot_echantillon_q5(mu)
+        plot_echantillon_q8(mu)
+        fig.savefig(f"superposed_mu{mu}.png")
+
+
+def find_convergence_mu():
+    debut = 0
+    fin = 7
+    ecart = fin - debut
+    while ecart > 10e-6:
+        m = (debut + fin) / 2
+        _, _ , k = calcul_uk0(mu=m)
+        # print(m, k)
+        if k > 200:
+            fin = m
+        else:
+            debut = m
+        ecart = fin - debut
+    return m
+
+
 def main():
-    b, a, c = [2, 6], [1, 10, 10], [4, 5]
-    l, v = lutri(a, b, c)
-    print(l, v)
-    y = descente(l, [3, 3, 3])
-    print(y)
-    x = remontee(v, c, [3, 3, 3])
-    print(x)
+    # b, a, c = [2, 6], [1, 10, 10], [4, 5]
+    # l, v = lutri(a, b, c)
+    # print(l, v)
+    # y = descente(l, [3, 3, 3])
+    # print(y)
+    # x = remontee(v, c, [3, 3, 3])
+    # print(x)
 
     # plot_echantillon_q5(1)
     # plt.show()
     # plot_echantillon_q6(1)
     # plt.show()
 
-    plot_echantillon_q5(1)
-    plot_echantillon_q8(1)
-    plt.show()
-    plot_echantillon_q5(4)
-    plot_echantillon_q8(4)
-    plt.show()
+    # plot_echantillon_q5(1)
+    # plot_echantillon_q8(1)
+    # plt.show()
+    # plot_echantillon_q5(4)
+    # plot_echantillon_q8(4)
+    # plt.show()
 
+    # plot_variations_mu()
 
+    mu = find_convergence_mu()
+    print(mu) # 4.828635215759277
 
     # b, a, c = [-4, -3, -2, 2], [-2, 5, -1, 4, -2], [1, 2, -1, 1]
     # l, v = lutri(a, b, c)
