@@ -88,30 +88,30 @@ def solve_debye_huckel(n, mu):
 
 
 def plot_debye_huckel(x, u):
-    plt.plot(x, u, label="u")
+    plt.plot(x, u, label="Debye-Huckel")
     plt.xlabel("Points de discrétisations $x_i$")
     plt.ylabel("Solutions ponctuelles $u_i$")
     plt.title("Schéma aux différences finies de l'équation de Debye-Huckel")
     plt.legend()
-    plt.show()
 
 
-def plot_echantillon_q5():
+def plot_echantillon_q5(mu):
     """
         Affichage des couples (xi, ui)
     """
-    x, u, _ = solve_debye_huckel(n=1000, mu=1)
+    x, u, _ = solve_debye_huckel(n=1000, mu=mu)
     plot_debye_huckel(x, u)
 
 
-def plot_echantillon_q6():
+def plot_echantillon_q6(mu):
     """
         Etude de l'influence du pas de discrétisation
     """
     u0, h = [], []
     for n in [10, 15, 30, 70, 100, 1000, 10000]:
-        _, u, _ = solve_debye_huckel(n, mu=1)
+        _, u, _ = solve_debye_huckel(n, mu=mu)
         # plot_debye_huckel(x, u)
+        # plt.show()
         u0.append(u[0])
         h.append(10 / n)
     # print(h, u0)
@@ -120,7 +120,6 @@ def plot_echantillon_q6():
     plt.ylabel("Solutions ponctuelles $u_0$")
     plt.title("Influence du pas de la discrétisation")
     plt.legend()
-    plt.show()
 
 
 def solve_poisson_boltzmann(u, n, mu):
@@ -163,7 +162,7 @@ def tridiag(diags, k1=-1, k2=0, k3=1):
     return np.diag(b, k1) + np.diag(a, k2) + np.diag(c, k3)
 
 
-def calcul_uk0(mu = 1):
+def calcul_uk0(mu=1):
     # Paramètres de la simualtion
     mu1, mu2 = 10e-12, 10e-9
     n = 1000
@@ -176,7 +175,13 @@ def calcul_uk0(mu = 1):
     ecart2 = u
 
     k = 0
-    while not (k > 200 or (np.linalg.norm(ecart1, np.inf) < mu1 and np.linalg.norm(ecart2, np.inf) < mu2)):
+    while not (
+        k > 200
+        or (
+            np.linalg.norm(ecart1, np.inf) < mu1
+            and np.linalg.norm(ecart2, np.inf) < mu2
+        )
+    ):
         x, u_suivant, z = solve_poisson_boltzmann(u, n, mu)
         ecart1 = A.dot(u_suivant) - z
         ecart2 = u_suivant - u
@@ -187,14 +192,13 @@ def calcul_uk0(mu = 1):
 
 
 def plot_echantillon_q8(mu):
-    x, u, k = calcul_uk0(mu = mu)
+    x, u, k = calcul_uk0(mu=mu)
     print(f"k vaut {k} pour mu = {mu}")
-    plt.plot(x, u, label="u")
+    plt.plot(x, u, label="Poisson-Boltzmann")
     plt.xlabel("Points de discrétisations $x_i$")
     plt.ylabel("Solutions ponctuelles $u_i$")
     plt.title("Schéma aux différences finies de l'équation de Poisson-Boltzmann")
     plt.legend()
-    plt.show()
 
 
 def main():
@@ -206,11 +210,19 @@ def main():
     x = remontee(v, c, [3, 3, 3])
     print(x)
 
-    # plot_echantillon_q5()
-    # plot_echantillon_q6()
+    # plot_echantillon_q5(1)
+    # plt.show()
+    # plot_echantillon_q6(1)
+    # plt.show()
 
+    plot_echantillon_q5(1)
     plot_echantillon_q8(1)
+    plt.show()
+    plot_echantillon_q5(4)
     plot_echantillon_q8(4)
+    plt.show()
+
+
 
     # b, a, c = [-4, -3, -2, 2], [-2, 5, -1, 4, -2], [1, 2, -1, 1]
     # l, v = lutri(a, b, c)
