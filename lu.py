@@ -6,6 +6,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+plt.style.use('ggplot')
+
 def lutri(a, b, c):
     """
         Effectue une factorisation LU d'une matrice A tridiagonale
@@ -51,57 +53,98 @@ def remontee(v, c, y):
         x.insert(0, (y[i] - c[i] * x[0]) / v[i])
     return x
 
-def resoudre_systeme(n, mu, z):
+def solve_debye_huckel(n, mu):
+    """
+        Résolution de l'équation de Debye-Huckel.
+
+        Sortie : x vecteur réel de dimension n, u vecteur solution de dimension n
+    """
     h = 10 / n
-    #mu = 1
-    a = [-(2 + h ** 2) for _ in range(n)]
-    b = [1 - h / (2 * (1 + i * h)) for i in range(1, n)]
-    c = [2] + [1 + h / (2 * (1 + i * h)) for i in range(1, n - 1)]
-    #z = [mu * h * (h - 2)] + [0 for _ in range(n - 1)]
-    [l, v] = lutri(a, b, c)
+    # Initialisation
+    x = [1] * n
+    b, a, c, z = [0] * (n - 1), [-(2 + h ** 2)] * n, [0] * (n - 1), [0] * n
+    c[0], z[0] = 2, mu * h * (h - 2)
+    # Attribution
+    for i in range(1, n - 1):
+        xi = 1 + i * h
+        b[i - 1] = 1 - h / (2 * xi)
+        c[i] = 1 + h / (2 * xi)
+        x[i] = xi
+    xn = (1 + (n - 1) * h)
+    b[n - 2] = 1 - h / (2 * xn)
+    x[n - 1] = xn
+
+    l, v = lutri(a, b, c)
     y = descente(l, z)
     u = remontee(v, c, y)
-    return u
 
-def plot_echantillon_q5(n):
-    """
-        Réponse à la question 5
-    """
-    try:
-        mu = 1
-        # ISSUE : variable h appelée avant d'avoir été assignée
-        z = [mu * h * (h - 2)] + [0 for _ in range(n -1)]
-        u = resoudre_systeme(n, mu, z)
-        h = 10 / n
-        xi = [1 + i * h for i in range(n)]
-        y = np.array(u)
-        x = np.array(xi)
-        plt.plot(x, y)
-        plt.show()
-    except KeyboardInterrupt:
-        print("FIN DU PROGRAMME")
+    return x, u
 
-def plot_echantillon_q6(n):
+def plot_debye_huckel(x, u):
+    plt.plot(x, u, label="u")
+    plt.xlabel('Points de discrétisations $x_i$')
+    plt.ylabel('Solutions ponctuelles $u_i$')
+    plt.title("Schéma aux différences finies de l'équation de Debye-Huckel")
+    plt.legend()
+    plt.show()
+
+def plot_echantillon_q5():
     """
-        Réponse à la question 6
+        Affichage des couples (xi, ui)
     """
-    try:
-        suite_u0 = []
-        mu = 1
-        # ISSUE : variable h appelée avant d'avoir été assignée
-        z = [mu * h * (h - 2)] + [0 for _ in range(n -1)]
-        for i in range(1, n + 1):
-            u = resoudre_systeme(i, mu, z)
-            suite_u0.append(u[0])
-        yh = [10 / i for i in range(1, n + 1)]
-        yh.reverse()
-        suite_u0.reverse()
-        y = np.array(yh)
-        x = np.array(suite_u0)
-        plt.plot(x, y)
-        plt.show()
-    except KeyboardInterrupt:
-        print("FIN DU PROGRAMME")
+    x, u = solve_debye_huckel(n = 1000, mu = 1)
+    plot_debye_huckel(x, u)
+
+def plot_echantillon_q6():
+    """
+        Etude de l'influence du pas de discrétisation
+    """
+    u0, h = [], []
+    for n in [10, 15, 30, 70, 100, 1000, 10000]:
+        _, u = solve_debye_huckel(n, mu = 1)
+        # plot_debye_huckel(x, u)
+        u0.append(u[0])
+        h.append(10 / n)
+    # print(h, u0)
+    plt.plot(h, u0, 'o', label="$u_0$")
+    plt.xlabel('Pas de discrétisations $h$')
+    plt.ylabel('Solutions ponctuelles $u_0$')
+    plt.title("Influence du pas de la discrétisation")
+    plt.legend()
+    plt.show()
+
+def solve_poisson_boltzmann(u, n, mu):
+    """
+        Résolution de l'équation de Poisson-Boltzmann.
+
+        On calcule u(k+1) à partir de u(k).
+
+        Sortie : x vecteur réel de dimension n, u vecteur solution de dimension n
+    """
+    h = 10 / n
+    g = lambda x: np.sinh(x) - x
+    # Initialisation
+    x = [1] * n
+    b, a, c, z = [0] * (n - 1), [-(2 + h ** 2)] * n, [0] * (n - 1), [0] * n
+    c[0], z[0] = 2,(h ** 2) * g(u[0]) + mu * h * (h - 2)
+    # Attribution
+    for i in range(1, n - 1):
+        xi = 1 + i * h
+        b[i - 1] = 1 - h / (2 * xi)
+        c[i] = 1 + h / (2 * xi)
+        z[i] = (h ** 2) * g(u[i])
+        x[i] = xi
+    # Dernier élément
+    xn = (1 + (n - 1) * h)
+    b[n - 2] = 1 - h / (2 * xn)
+    x[n - 1] = xn
+    z[n - 1] = (h ** 2) * g(u[n - 1])
+
+    l, v = lutri(a, b, c)
+    y = descente(l, z)
+    u_suivant = remontee(v, c, y)
+
+    return x, u_suivant
 
 def calculer_u(u, mu, n):
     """
@@ -109,7 +152,7 @@ def calculer_u(u, mu, n):
     """
     h = 10 / n
     z = [(h ** 2) * (np.sinh(u[0]) - u[0]) + mu * h * (h - 2)] + [(h ** 2) * (np.sinh(i) - i) for i in u[1:]]
-    u_suivant = resoudre_systeme(n, mu, z)
+    u_suivant = solve_debye_huckel(n, mu)
     return u_suivant
 
 def plot_echantillon_q8(mu, n):
@@ -146,20 +189,23 @@ def plot_echantillon_q8(mu, n):
     return k
 
 def main():
-    #b, a, c = [2, 6], [1, 10, 10], [4, 5]
-    #l, v = lutri(a, b, c)
-    #print(l, v)
-    #y = descente(l, [3, 3, 3])
-    #print(y)
-    #x = remontee(v, c, [3, 3, 3])
-    #print(x)
+    b, a, c = [2, 6], [1, 10, 10], [4, 5]
+    l, v = lutri(a, b, c)
+    print(l, v)
+    y = descente(l, [3, 3, 3])
+    print(y)
+    x = remontee(v, c, [3, 3, 3])
+    print(x)
 
-    #b, a, c = [-4, -3, -2, 2], [-2, 5, -1, 4, -2], [1, 2, -1, 1]
-    #l, v = lutri(a, b, c)
-    #assert(l == [2.0, -1.0, -2.0, 1.0] and v == [-2, 3.0, 1.0, 2.0, -3.0])
-    #print(l, v)
-    k = plot_echantillon_q8(7, 1000)
-    print(k)
+    # plot_echantillon_q5()
+    # plot_echantillon_q6()
+
+    # b, a, c = [-4, -3, -2, 2], [-2, 5, -1, 4, -2], [1, 2, -1, 1]
+    # l, v = lutri(a, b, c)
+    # assert(l == [2.0, -1.0, -2.0, 1.0] and v == [-2, 3.0, 1.0, 2.0, -3.0])
+    # print(l, v)
+    # k = plot_echantillon_q8(7, 1000)
+    # print(k)
 
 
 main()
