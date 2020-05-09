@@ -124,7 +124,7 @@ def plot_echantillon_q6(mu):
 
 def solve_poisson_boltzmann(u, n, mu):
     """
-        Résolution de l'équation de Poisson-Boltzmann.
+        Résolution de l'équation de Poisson-Boltzmann avec la méthode des approximations successives
 
         On calcule u(k+1) à partir de u(k).
 
@@ -146,8 +146,8 @@ def solve_poisson_boltzmann(u, n, mu):
     # Dernier élément
     xn = 1 + (n - 1) * h
     b[n - 2] = 1 - h / (2 * xn)
-    x[n - 1] = xn
     z[n - 1] = (h ** 2) * g(u[n - 1])
+    x[n - 1] = xn
 
     l, v = lutri(a, b, c)
     y = descente(l, z)
@@ -246,6 +246,74 @@ def find_convergence_mu():
     return m
 
 
+def solve_poisson_boltzmann_newton(u, n, mu):
+    """
+        Résolution de l'équation de Poisson-Boltzmann avec la méthode de Newton
+
+        On calcule u(k+1) à partir de u(k).
+
+        Sortie : x vecteur réel de dimension n, u vecteur solution de dimension n, F vecteur de la fonction
+    """
+    h = 10 / n
+    # Initialisation
+    x = [1] * n
+    b, a, c, F = [0] * (n - 1), -2 - (h ** 2) * np.cosh(u), [0] * (n - 1), [0] * n
+    F[0] = - 2 * u[0] - (h ** 2) * np.sinh(u[0]) + 2 * u[1] + mu * h * (2 - h)
+    # Attribution
+    for i in range(1, n - 1):
+        xi = 1 + i * h
+        bi = 1 - h / (2 * xi)
+        ci = 1 + h / (2 * xi)
+        b[i - 1] = bi
+        c[i] = ci
+        F[i] = bi * u[i - 1] - 2 * u[i] - (h ** 2) * np.sinh(u[i]) + ci * u[i + 1]
+        x[i] = xi
+    # Dernier élément
+    xn = 1 + (n - 1) * h
+    bn = 1 - h / (2 * xn)
+    b[n - 2] = bn
+    F[n - 1] = bn * u[n - 2] - 2 * u[n - 1] - (h ** 2) * np.sinh(u[n - 1])
+    x[n - 1] = xn
+
+    print(F)
+    F = np.array(F)
+
+    inv_Jk = np.linalg.inv(tridiag([b, a, c]))
+    u_suivant = u - inv_Jk.dot(F)
+
+    return x, u_suivant, F
+
+
+def calcul_uk0_newton(mu=1):
+    # Paramètres de la simualtion
+    mu1, mu2 = 10e-12, 10e-9
+    n = 1000
+
+    # Initialisation de u et calcul de A
+    _, u, diags = solve_debye_huckel(n, mu)
+    A = tridiag(diags)
+    # Initialisation des écarts
+    ecart1 = A.dot(u)
+    ecart2 = u
+
+    k = 0
+    while not (
+        k > 50
+        or (
+            np.linalg.norm(ecart1, np.inf) < mu1
+            and np.linalg.norm(ecart2, np.inf) < mu2
+        )
+    ):
+        x, u_suivant, F = solve_poisson_boltzmann_newton(u, n, mu)
+        ecart1 = F
+        ecart2 = u_suivant - u
+        print(k, np.linalg.norm(ecart1, np.inf), np.linalg.norm(ecart2, np.inf))
+        u = u_suivant
+        k += 1
+
+    return x, u, k
+
+
 def main():
     # b, a, c = [2, 6], [1, 10, 10], [4, 5]
     # l, v = lutri(a, b, c)
@@ -269,15 +337,15 @@ def main():
 
     # plot_variations_mu()
 
-    mu = find_convergence_mu()
-    print(mu) # 4.828635215759277
+    # mu = find_convergence_mu()
+    # print(mu) # 4.828635215759277
+
+    print(calcul_uk0_newton(mu=1))
 
     # b, a, c = [-4, -3, -2, 2], [-2, 5, -1, 4, -2], [1, 2, -1, 1]
     # l, v = lutri(a, b, c)
     # assert(l == [2.0, -1.0, -2.0, 1.0] and v == [-2, 3.0, 1.0, 2.0, -3.0])
     # print(l, v)
-    # k = plot_echantillon_q8(7, 1000)
-    # print(k)
 
 
 main()
