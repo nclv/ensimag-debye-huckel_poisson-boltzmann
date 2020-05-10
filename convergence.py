@@ -6,13 +6,13 @@ convergence.py : trouver le mu limite
 """
 
 
-def find_mu_limit(a, b, klimit, solveur, epsilon=10e-6):
+def find_mu_limit(a, b, klimit, solveur, epsilon=10e-6, n=1000):
     debut = a
     fin = b
     ecart = fin - debut
     while ecart > epsilon:
         m = (debut + fin) / 2
-        _, _, k = solveur(mu=m)
+        _, _, k = solveur(n, m)
         # print(m, k)
         if k > klimit:
             fin = m

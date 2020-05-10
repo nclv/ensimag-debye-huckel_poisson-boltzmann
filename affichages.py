@@ -31,9 +31,25 @@ def plot_solution_poisson_boltzmann(n, mu, solveur_poisson_boltzmann, method):
     plot_solution(x, u, mu, system="Poisson-Boltzmann", method=method)
 
 
-def plot_solution_debye_huckel(n, mu, solveur_debye_huckel=solve_debye_huckel, method="Schéma aux différences finies"):
+def plot_solution_debye_huckel(
+    n,
+    mu,
+    solveur_debye_huckel=solve_debye_huckel,
+    method="Schéma aux différences finies",
+):
     x, u, _ = solveur_debye_huckel(n=n, mu=mu)
     plot_solution(x, u, mu, system="Debye-Huckel", method=method)
+
+
+def plot_comparison(n, mu):
+    plot_solution_poisson_boltzmann(
+        n,
+        mu,
+        solve_poisson_boltzmann_differences_finies,
+        "Schéma aux différences finies",
+    )
+    plot_solution_debye_huckel(n, mu)
+    plt.title(f"Comparaison des solutions pour mu = {mu} et n = {n}")
 
 
 def plot_discretisation_debye_huckel(mu, solveur_debye_huckel=solve_debye_huckel):
@@ -53,6 +69,7 @@ def plot_discretisation_debye_huckel(mu, solveur_debye_huckel=solve_debye_huckel
     plt.ylabel("Solutions ponctuelles $u_0$")
     plt.title("Influence du pas de la discrétisation")
     plt.legend()
+
 
 def plot_variations_mu_debye_huckel():
     fig = plt.figure()
@@ -81,12 +98,18 @@ def plot_variations_mu_poisson_boltzmann(solveur_poisson_boltzmann, method):
     fig.savefig(title + ".png")
     # pour mu = 5.7 et mu = 6.4 on retombe ie. diverge
 
+
 def plot_variations_mu_superposed():
     for mu in np.linspace(0.1, 6.4, 10):
         mu = round(mu, 3)
         fig = plt.figure()
         plot_solution_debye_huckel(1000, mu)
-        plot_solution_poisson_boltzmann(1000, mu, solve_poisson_boltzmann_differences_finies, "Schéma aux différences finies")
+        plot_solution_poisson_boltzmann(
+            1000,
+            mu,
+            solve_poisson_boltzmann_differences_finies,
+            "Schéma aux différences finies",
+        )
         title = f"superposed_mu{mu}_differences_finies"
         plt.title(title)
         fig.savefig(title + ".png")
