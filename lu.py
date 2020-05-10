@@ -257,8 +257,9 @@ def solve_poisson_boltzmann_newton(u, n, mu):
     h = 10 / n
     # Initialisation
     x = [1] * n
-    b, a, c, F = [0] * (n - 1), -2 - (h ** 2) * np.cosh(u), [0] * (n - 1), [0] * n
-    F[0] = - 2 * u[0] - (h ** 2) * np.sinh(u[0]) + 2 * u[1] + mu * h * (2 - h)
+    b, a, c, F = [0] * (n - 1), -2 -(h ** 2) * np.cosh(u), [0] * (n - 1), [0] * n
+    F[0] = -2 * u[0] - (h ** 2) * np.sinh(u[0]) + 2 * u[1] + mu * h * (2 - h)
+    print(u, a)
     # Attribution
     for i in range(1, n - 1):
         xi = 1 + i * h
@@ -275,7 +276,7 @@ def solve_poisson_boltzmann_newton(u, n, mu):
     F[n - 1] = bn * u[n - 2] - 2 * u[n - 1] - (h ** 2) * np.sinh(u[n - 1])
     x[n - 1] = xn
 
-    print(F)
+    # print(F)
     F = np.array(F)
 
     inv_Jk = np.linalg.inv(tridiag([b, a, c]))
