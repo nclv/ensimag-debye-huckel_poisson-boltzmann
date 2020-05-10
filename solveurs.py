@@ -158,7 +158,7 @@ def solve_poisson_boltzmann_differences_finies(n, mu):
     )
 
 
-def solve_poisson_boltzmann_newton(mu):
+def solve_poisson_boltzmann_newton(n, mu):
     return solve_poisson_boltzmann(
         n=n,
         mu=mu,

@@ -13,7 +13,7 @@ def find_mu_limit(a, b, klimit, solveur, epsilon=10e-6, n=1000):
     while ecart > epsilon:
         m = (debut + fin) / 2
         _, _, k = solveur(n, m)
-        # print(m, k)
+        print(m, k)
         if k > klimit:
             fin = m
         else:

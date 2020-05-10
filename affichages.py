@@ -9,7 +9,11 @@ affichages.py : Debye-Huckel (finite differences), Poisson-Boltzmann (finite dif
 import matplotlib.pyplot as plt
 import numpy as np
 
-from solveurs import solve_debye_huckel, solve_poisson_boltzmann_differences_finies
+from solveurs import (
+    solve_debye_huckel,
+    solve_poisson_boltzmann_differences_finies,
+    solve_poisson_boltzmann_newton,
+)
 
 plt.style.use("ggplot")
 
@@ -28,7 +32,7 @@ def plot_solution(x, u, mu, system, method):
 def plot_solution_poisson_boltzmann(n, mu, solveur_poisson_boltzmann, method):
     x, u, k = solveur_poisson_boltzmann(n, mu)
     print(f"k vaut {k} pour n = {n} et mu = {mu}")
-    plot_solution(x, u, mu, system="Poisson-Boltzmann", method=method)
+    plot_solution(x, u, mu, system=f"{solveur_poisson_boltzmann.__name__}", method=method)
 
 
 def plot_solution_debye_huckel(
@@ -41,7 +45,7 @@ def plot_solution_debye_huckel(
     plot_solution(x, u, mu, system="Debye-Huckel", method=method)
 
 
-def plot_comparison(n, mu):
+def plot_comparison_finite_differences(n, mu):
     plot_solution_poisson_boltzmann(
         n,
         mu,
@@ -49,6 +53,19 @@ def plot_comparison(n, mu):
         "Schéma aux différences finies",
     )
     plot_solution_debye_huckel(n, mu)
+    plt.title(f"Comparaison des solutions pour mu = {mu} et n = {n}")
+
+
+def plot_comparison_newton(n, mu):
+    plot_solution_poisson_boltzmann(
+        n, mu, solve_poisson_boltzmann_newton, "Méthode de newton",
+    )
+    plot_solution_poisson_boltzmann(
+        n,
+        mu,
+        solve_poisson_boltzmann_differences_finies,
+        "Schéma aux différences finies",
+    )
     plt.title(f"Comparaison des solutions pour mu = {mu} et n = {n}")
 
 
@@ -99,7 +116,7 @@ def plot_variations_mu_poisson_boltzmann(solveur_poisson_boltzmann, method):
     # pour mu = 5.7 et mu = 6.4 on retombe ie. diverge
 
 
-def plot_variations_mu_superposed():
+def plot_variations_mu_superposed_differences_finies():
     for mu in np.linspace(0.1, 6.4, 10):
         mu = round(mu, 3)
         fig = plt.figure()
@@ -111,5 +128,26 @@ def plot_variations_mu_superposed():
             "Schéma aux différences finies",
         )
         title = f"superposed_mu{mu}_differences_finies"
+        plt.title(title)
+        fig.savefig(title + ".png")
+
+
+def plot_variations_mu_superposed_newton():
+    for mu in np.linspace(0.1, 6.4, 10):
+        mu = round(mu, 3)
+        fig = plt.figure()
+        plot_solution_poisson_boltzmann(
+            1000,
+            mu,
+            solve_poisson_boltzmann_newton,
+            "Méthode de Newton",
+        )
+        plot_solution_poisson_boltzmann(
+            1000,
+            mu,
+            solve_poisson_boltzmann_differences_finies,
+            "Schéma aux différences finies",
+        )
+        title = f"superposed_mu{mu}_newton"
         plt.title(title)
         fig.savefig(title + ".png")
