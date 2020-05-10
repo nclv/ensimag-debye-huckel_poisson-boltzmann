@@ -157,8 +157,8 @@ def main():
     # plot_q12_extended()
 
     # Recherche du mu limite après lequel la méthode de Newton ne converge plus
-    mu_limit = find_mu_limit(75, 80, 50, solve_poisson_boltzmann_newton)
-    print(mu_limit)
+    # mu_limit = find_mu_limit(75, 80, 50, solve_poisson_boltzmann_newton)
+    # print(mu_limit)
     """
     77.5 51
     76.25 50
