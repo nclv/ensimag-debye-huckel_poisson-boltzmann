@@ -127,7 +127,7 @@ def solve_poisson_boltzmann(n, mu, klimit, solveur, function_ecart1):
     _, u, diags = solve_debye_huckel(n, mu)
     A = tridiag(diags)
     # Initialisation des écarts
-    ecart1 = A.dot(u)
+    ecart1 = calcul_F(u, n, mu)
     ecart2 = u
 
     k = 0
@@ -158,31 +158,31 @@ def solve_poisson_boltzmann_differences_finies(n, mu):
     )
 
 
+def calcul_F(u, n, mu):
+    h = 10 / n
+    # Initialisation
+    F = [0] * n
+    F[0] = -2 * u[0] - (h ** 2) * np.sinh(u[0]) + 2 * u[1] + mu * h * (2 - h)
+    # Attribution
+    for i in range(1, n - 1):
+        xi = 1 + i * h
+        bi = 1 - h / (2 * xi)
+        ci = 1 + h / (2 * xi)
+        F[i] = bi * u[i - 1] - 2 * u[i] - (h ** 2) * np.sinh(u[i]) + ci * u[i + 1]
+    # Dernier élément
+    xn = 1 + (n - 1) * h
+    bn = 1 - h / (2 * xn)
+    F[n - 1] = bn * u[n - 2] - 2 * u[n - 1] - (h ** 2) * np.sinh(u[n - 1])
+
+    # Calcule de uk+1
+    return np.array(F)
+
+
 def solve_poisson_boltzmann_newton(n, mu):
-
-    def calcul_F(u, n=n, mu=mu):
-        h = 10 / n
-        # Initialisation
-        F = [0] * n
-        F[0] = -2 * u[0] - (h ** 2) * np.sinh(u[0]) + 2 * u[1] + mu * h * (2 - h)
-        # Attribution
-        for i in range(1, n - 1):
-            xi = 1 + i * h
-            bi = 1 - h / (2 * xi)
-            ci = 1 + h / (2 * xi)
-            F[i] = bi * u[i - 1] - 2 * u[i] - (h ** 2) * np.sinh(u[i]) + ci * u[i + 1]
-        # Dernier élément
-        xn = 1 + (n - 1) * h
-        bn = 1 - h / (2 * xn)
-        F[n - 1] = bn * u[n - 2] - 2 * u[n - 1] - (h ** 2) * np.sinh(u[n - 1])
-
-        # Calcule de uk+1
-        return np.array(F)
-
     return solve_poisson_boltzmann(
         n=n,
         mu=mu,
         klimit=50,
         solveur=iterate_poisson_boltzmann_newton,
-        function_ecart1=lambda u, A, F: calcul_F(u),
+        function_ecart1=lambda u, A, F: calcul_F(u, n=n, mu=mu),
     )
