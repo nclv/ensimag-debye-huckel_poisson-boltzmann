@@ -81,11 +81,6 @@ def plot_variations_mu_poisson_boltzmann(solveur_poisson_boltzmann, method):
     fig.savefig(title + ".png")
     # pour mu = 5.7 et mu = 6.4 on retombe ie. diverge
 
-plot_variations_mu_debye_huckel()
-
-def plot_q9():
-    plot_variations_mu_poisson_boltzmann(solve_poisson_boltzmann_differences_finies, "Schéma aux différences finies")
-
 def plot_variations_mu_superposed():
     for mu in np.linspace(0.1, 6.4, 10):
         mu = round(mu, 3)

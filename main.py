@@ -10,9 +10,13 @@ import matplotlib.pyplot as plt
 
 from affichages import (plot_discretisation_debye_huckel,
                         plot_solution_debye_huckel,
-                        plot_solution_poisson_boltzmann)
+                        plot_solution_poisson_boltzmann,
+                        plot_variations_mu_debye_huckel,
+                        plot_variations_mu_poisson_boltzmann,
+                        plot_variations_mu_superposed)
 from lu import descente, lutri, remontee
 from solveurs import solve_poisson_boltzmann_differences_finies
+from convergence import find_mu_limit
 
 
 def q1_2_3():
@@ -60,6 +64,15 @@ def plot_q8():
     plot_solution_debye_huckel(1000, 4)
     plt.show()
 
+def plot_q9():
+    plot_variations_mu_poisson_boltzmann(solve_poisson_boltzmann_differences_finies, "Schéma aux différences finies")
+
+def plot_q9_extended():
+    plot_variations_mu_debye_huckel()
+    plot_variations_mu_superposed()
+
+    mu_limit = find_mu_limit(0, 7, 200, solve_poisson_boltzmann_differences_finies)
+    print(mu_limit)
 
 def main():
 
@@ -67,13 +80,9 @@ def main():
     plot_q5()
     plot_q6()
     plot_q8()
+    plot_q9()
 
-    # plot_variations_mu()
-
-    # mu = find_convergence_mu(0, 7, 200, calcul_uk0_differences_finies)
-    # print(mu) # 4.828635215759277
-
-    calcul_uk0_newton(mu=7)
+    plot_q9_extended()
 
 
 main()

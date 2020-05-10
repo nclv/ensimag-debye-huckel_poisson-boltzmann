@@ -6,7 +6,7 @@ convergence.py : trouver le mu limite
 """
 
 
-def find_convergence_mu(a, b, klimit, solveur, epsilon=10e-6):
+def find_mu_limit(a, b, klimit, solveur, epsilon=10e-6):
     debut = a
     fin = b
     ecart = fin - debut
