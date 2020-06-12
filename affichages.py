@@ -93,7 +93,7 @@ def plot_variations_mu_debye_huckel():
     for mu in np.linspace(0.1, 6.4, 10):
         mu = round(mu, 3)
         plot_solution_debye_huckel(1000, mu)
-    title = f"debye_mu_variations"
+    title = f"plots/debye_mu_variations"
     plt.title(title)
     fig.savefig(title + ".png")
 
@@ -110,7 +110,7 @@ def plot_variations_mu_poisson_boltzmann(solveur_poisson_boltzmann, method):
     for mu in np.linspace(0.1, 6.4, 10):
         mu = round(mu, 3)
         plot_solution_poisson_boltzmann(1000, mu, solveur_poisson_boltzmann, method)
-    title = f"poisson_mu_variations_{solveur_poisson_boltzmann.__name__}"
+    title = f"plots/poisson_mu_variations_{solveur_poisson_boltzmann.__name__}"
     plt.title(title)
     fig.savefig(title + ".png")
     # pour mu = 5.7 et mu = 6.4 on retombe ie. diverge
@@ -127,7 +127,7 @@ def plot_variations_mu_superposed_differences_finies():
             solve_poisson_boltzmann_differences_finies,
             "Schéma aux différences finies",
         )
-        title = f"superposed_mu{mu}_differences_finies"
+        title = f"plots/superposed_mu{mu}_differences_finies"
         plt.title(title)
         fig.savefig(title + ".png")
 
@@ -148,6 +148,6 @@ def plot_variations_mu_superposed_newton():
             solve_poisson_boltzmann_differences_finies,
             "Schéma aux différences finies",
         )
-        title = f"superposed_mu{mu}_newton"
+        title = f"plots/superposed_mu{mu}_newton"
         plt.title(title)
         fig.savefig(title + ".png")
